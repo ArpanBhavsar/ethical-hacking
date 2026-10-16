@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Week 2 Lab — CyberCorp Passive OSINT Dossier · ETH-201</title>
+<style>
+:root{--navy:#14294a;--teal:#087e79;--bg:#eef2f7;--ink:#202e42;--muted:#59687d;--line:#dbe3ec}
+*{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+header{-webkit-print-color-adjust:exact;print-color-adjust:exact;background:linear-gradient(135deg,#0d1d36,#14294a 60%,#0d3d3a);color:#fff;padding:44px 24px 36px}
+header .in{max-width:1180px;margin:0 auto} header .top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
+header .logo{height:64px;width:auto} header .wk{background:#087e79;border-radius:999px;padding:5px 14px;font-weight:800;font-size:13px;letter-spacing:.06em;text-transform:uppercase}
+header .eb{color:#7ed2c2;font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:13px}
+header h1{margin:10px 0 6px;font-size:34px;line-height:1.15} header p{margin:0;color:#c9d7ec;max-width:900px}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px} .meta span{background:#ffffff18;border:1px solid #ffffff30;border-radius:999px;padding:6px 12px;font-size:13px}
+.wrap{max-width:1180px;margin:24px auto;padding:0 24px 80px;display:grid;grid-template-columns:240px 1fr;gap:22px}
+nav{position:sticky;top:16px;align-self:start;background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
+nav b{display:block;margin-bottom:8px;color:var(--navy)} nav a{display:block;padding:6px 0;color:var(--navy);text-decoration:none;font-size:14px;font-weight:600} nav a:hover{color:var(--teal)}
+main section{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px 26px;margin-bottom:18px}
+h2{margin:0 0 10px;color:var(--navy);font-size:22px} h3{color:var(--navy);margin:18px 0 8px}
+.goal{background:#e9f6f2;border-left:4px solid var(--teal);padding:12px 14px;border-radius:0 8px 8px 0}
+.ethics{background:#fff4e8;border-left:4px solid #b45a28;padding:12px 14px;border-radius:0 8px 8px 0;margin:12px 0}
+.checkpoint{background:#eef6ff;border-left:4px solid #4964b5;padding:12px 14px;border-radius:0 8px 8px 0}
+pre,code{font-family:ui-monospace,Menlo,Consolas,monospace} pre{background:#13263e;color:#e5eff8;padding:14px;border-radius:8px;overflow:auto;white-space:pre-wrap;font-size:13px}
+details.sol{margin-top:12px;border:1px solid var(--line);border-radius:8px;padding:10px 14px;background:#f7fafc}
+details.sol summary{cursor:pointer;font-weight:700;color:var(--navy)}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0} button{font:inherit;border:1px solid #bac8d9;background:#fff;color:var(--navy);padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:650}
+ul.tasks{padding-left:20px} ul.tasks li{margin:6px 0}
+@media(max-width:860px){.wrap{grid-template-columns:1fr} nav{position:static} header h1{font-size:26px}}
+</style></head><body>
+<header><div class="in">
+<div class="top"><img class="logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAlgAAAD4CAMAAAAHO2gpAAABIFBMVEUAAADYAA/+/v7+/v7kABH+AAC3AADXAA/YAA79+PnUAAzYAA/XAA/XAA/+/f3++/zXAA/++fn+/Px/AAD++Pn85uj76OvnZW752NjdKDX41tj2yMz75+n3yMrqeoLxpaviSFL7vLzbGCT76+3ulpz/f3/shY33qazgOUXvnKLlWWPztrv2mJjkUlvpc3vaERzeMjz1u9D/2ezamZn/AP/1vMGqVVW/f3/87u/0lrL3qs363uB/f3+qqqq4///aACTiABD/yOv32du/v7/Uf3/fv7/gMT7/f///qv/43uP//78A//9/AH9///+ZAAC2ACS/P3/UVVXMZmbUqtTU1NTgABHhAA//AFX/Var/f7/77/EAAAAAAAAAAAAAAAAAAADmO3O0AAAAYHRSTlMA/v0D/gIDrSpvENBsUdCQkFCuAjEVLf8P/////wz///8H/0n/Av8G/////wj/////DBAHAf8DBGsJB/8CAwMH1gciBAYI/wIDKwQBAgIFBwQGBQYGOnADAwSDAAAAAACmJAVsAAArjElEQVR42u2dB3/bOpboKYGgWERSVHFkO45LruP05LaZO213Znbftre9vLLf/4MsAIIkQKJRBEk5P2DvThJTomjj73MOTvW8b3PBOPag55ZbtlecQm/nfgzzreCsljUhA714HTuy3LK+dl64cdpwxpWe17JHQuClK6cN51v+Wa1FaA+FwFuvYujImmktzmtZBAvpwU3i7Zw2dGBZBgvJrNXKg44sB5ZlsCCMFysvcGQ5sOyChZRhuNggweXWHMb7NwwWPhr6a0fWHGuzWpwTW5bBQkxtHFkzrTjdJAv/GwULBjDxU0fW9IuYtjDcJOcht2yDhc0s3w8dWTMsSA7kcbryv0WwEFlrP3HBnbnYwr/RqYlCPMWdPitYCKmVv4qd02FGuRUneghWfVeSUBznAmsH44XvnA5zsuXFOnXor05yU4bpGh8Q/FnAQt8XksXuaDinIe/FOkW4gjHst+q7h+uVXteOARZRhujOThnOSFbq6yQW7C+x0AqIvAi1aI0C1m6HlGESu6jhnJYWY2a9vfta/fXh1au3p4LV2DqImVBjxo0CFvmF8V08elaRta42/tPVcrm8flH+43K5fDMULMKtF2/86cEi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" alt="Focus College logo"><span class="wk">Week 2 Lab</span></div>
+<div class="eb">Ethical Hacking (ETH-201) · Focus College · Fall 2026 · Instructor: Arpan Bhavsar</div>
+<h1>Week 2 Lab — CyberCorp Passive OSINT Dossier (Project Phase 1)</h1>
+<p>Build a reproducible passive footprinting dossier for the fictional client CyberCorp Enterprise using only free tools and authorized targets. This is the CEH footprinting deliverable that feeds Week 3 scanning.</p>
+<div class="meta"><span>⏱ About 2.5 hours</span><span>🧰 Kali or any Linux · dig/whois/RDAP · exiftool · browser</span><span>📦 Simulated CyberCorp pack in lab-assets/</span><span>✅ Solutions included</span></div>
+</div></header>
+<div class="wrap">
+<nav><b>Lab parts</b>
+<a href="#start">Before you start</a>
+<a href="#p0">Part 0 — Ethics gate (10)</a>
+<a href="#p1">Part 1 — Domain &amp; DNS (25)</a>
+<a href="#p2">Part 2 — Website files (25)</a>
+<a href="#p3">Part 3 — Metadata (25)</a>
+<a href="#p4">Part 4 — People &amp; tech (25)</a>
+<a href="#p5">Part 5 — Dorks on paper (20)</a>
+<a href="#p6">Part 6 — Dossier &amp; countermeasures (30)</a>
+<a href="#res">Resources</a>
+<div class="btnrow"><button onclick="document.querySelectorAll('details.sol').forEach(d=>d.open=true)">Show all solutions</button>
+<button onclick="document.querySelectorAll('details.sol').forEach(d=>d.open=false)">Hide all solutions</button></div>
+</nav>
+<main>
+<section id="start"><h2>Before you start</h2>
+<div class="goal"><b>Goal.</b> Produce <code>dossier.md</code> (or PDF) with dated, sourced CyberCorp findings across organization, network, system and people baskets, plus countermeasure recommendations.</div>
+<div class="ethics"><b>Ethics.</b> Passive OSINT only. Authorized targets: the fictional CyberCorp files in <code>lab-assets/</code>, <code>example.com</code>, <code>scanme.nmap.org</code>, and your own systems. Do <b>not</b> dork, scan or scrape real organizations, classmates, workplaces or the college network. Generative AI is allowed to help clarify concepts if cited, but is <b>prohibited on Quiz 1</b>.</div>
+<div class="checkpoint"><b>Checkpoint files.</b> <code>dossier.md</code>, command log, copies of exiftool output, and a short countermeasures list.</div>
+<p>Create a working folder:</p>
+<pre>mkdir -p ~/cybercorp-phase1 && cd ~/cybercorp-phase1
+cp -r /path/to/week02/lab-assets ./</pre>
+</section>
+
+<section id="p0"><h2>Part 0 — Ethics gate (10 min)</h2>
+<div class="goal">Confirm you can state the authorization boundary before any tool runs.</div>
+<ul class="tasks">
+<li>Write four bullets: in-scope targets, out-of-scope examples, what “passive” means today, and what you will do if you accidentally find real credentials on the public web.</li>
+<li>Paste those bullets at the top of <code>dossier.md</code>.</li>
+</ul>
+<details class="sol"><summary>Show solution</summary>
+<p><b>In scope:</b> CyberCorp simulated pack; example.com; scanme.nmap.org; own VMs.</p>
+<p><b>Out of scope:</b> real local businesses, college network, classmates’ hosts, random GHDB targets.</p>
+<p><b>Passive:</b> public pages, registries, archives, CT logs, files already published / provided — no probes to CyberCorp servers, no social engineering.</p>
+<p><b>If real credentials appear:</b> stop, do not use them, do not share them, tell the instructor, preserve evidence if asked.</p>
+</details></section>
+
+<section id="p1"><h2>Part 1 — Domain &amp; DNS on example.com (25 min)</h2>
+<div class="goal">Practise RDAP/WHOIS and DNS reads on the permitted domain example.com, then copy the skill onto the simulated CyberCorp domain card.</div>
+<ul class="tasks">
+<li>Look up example.com via <a href="https://lookup.icann.org/">ICANN Lookup</a> or <code>whois example.com</code> / RDAP. Record registrar, dates, NS, DNSSEC.</li>
+<li>Resolve A, AAAA, NS, MX, TXT, SOA (dig or a DoH client). Note the null MX if present.</li>
+<li>Resolve scanme.nmap.org A and its PTR.</li>
+<li>In the dossier, create a CyberCorp domain table using the simulated values from lecture (ns1/ns2.cybercorp.example, portal/staging/vpn/mail).</li>
+</ul>
+<details class="sol"><summary>Show solution / expected output</summary>
+<pre>Verified on Sun Oct 11, 2026 (UTC 14:4x) from the instructor build box.
+DNS values were retrieved over DNS-over-HTTPS (https://dns.google/resolve) because the build box intercepts port 53;
+RDAP via https://rdap.verisign.com ; archive via the Wayback CDX API ; certificates via crt.sh JSON.
+Values (IPs, TTLs, serials) change over time - students' output will differ in detail.
+
+example.com A      104.20.23.154, 172.66.147.243 (TTL 300)
+example.com AAAA   2606:4700:10::6814:179a, 2606:4700:10::ac42:93f3
+example.com NS     hera.ns.cloudflare.com., elliott.ns.cloudflare.com. (TTL 21600)
+example.com MX     0 .   (null MX, RFC 7505: domain accepts no mail)
+example.com TXT    "v=spf1 -all"  and a verification token
+example.com SOA    elliott.ns.cloudflare.com. dns.cloudflare.com. 2416374680 10000 2400 604800 1800
+scanme.nmap.org A  45.33.32.156 ; PTR 156.32.33.45.in-addr.arpa -> scanme.nmap.org.
+RDAP EXAMPLE.COM   registrar "RESERVED-Internet Assigned Numbers Authority"; registered 1995-08-14; expires 2027-08-13;
+                   status client delete/transfer/update prohibited; NS ELLIOTT/HERA.NS.CLOUDFLARE.COM; DNSSEC signed: True
+Wayback CDX        earliest captures 20020120142510 http://example.com:80/ 200 text/html ...
+crt.sh             81 certificate entries; names include *.example.com, www, dev, m, products, support (test certs)
+</pre>
+<p>CyberCorp simulated row example: Domain cybercorp.example | Registrar Example Registrar Ltd | NS ns1/ns2.cybercorp.example | Subdomains www, portal, staging, vpn, mail (CT card).</p>
+</details></section>
+
+<section id="p2"><h2>Part 2 — Website files (25 min)</h2>
+<div class="goal">Extract attack-surface hints from robots.txt and sitemap.xml without touching a live CyberCorp server.</div>
+<ul class="tasks">
+<li>Open <code>lab-assets/cybercorp-site/robots.txt</code> and list every Disallow path. Explain why robots.txt is not access control (RFC 9309).</li>
+<li>Open <code>sitemap.xml</code> and list URLs that look like staging, portal, or document paths.</li>
+<li>Optional: visit web.archive.org for example.com and note the earliest capture year you see.</li>
+</ul>
+<details class="sol"><summary>Show solution</summary>
+<pre># robots.txt for www.cybercorp.example  (SIMULATED - fictional client for ETH-201)
+User-agent: *
+Disallow: /admin/
+Disallow: /backup/
+Disallow: /old-portal/
+Disallow: /hr/onboarding-2026/
+Disallow: /dev/
+Allow: /press/
+
+Sitemap: https://www.cybercorp.example/sitemap.xml
+</pre>
+<p>Paths of interest: /admin/, /backup/, /old-portal/, /hr/onboarding-2026/, /dev/. Sitemap adds careers, press, VPN PDF, portal.cybercorp.example, staging.cybercorp.example. RFC 9309: rules are not authorization; listing paths discloses them.</p>
+</details></section>
+
+<section id="p3"><h2>Part 3 — Metadata with exiftool (25 min)</h2>
+<div class="goal">Pull author, path and GPS clues from the sample files.</div>
+<ul class="tasks">
+<li>Install/use exiftool. Run it on <code>cybercorp-docs/vpn-setup-guide.docx</code>, <code>team-photo.jpg</code>, and <code>annual-report-2025.pdf</code>.</li>
+<li>Record every username, internal path, device and GPS coordinate.</li>
+<li>Write one countermeasure sentence for marketing/HR.</li>
+</ul>
+<details class="sol"><summary>Show solution / expected output</summary>
+<pre>$ exiftool -s -Author -Creator -Producer -Title -CreateDate annual-report-2025.pdf
+Author                          : Dana Whitfield
+Creator                         : Microsoft Word for Microsoft 365
+Producer                        : Microsoft: Print To PDF
+Title                           : CyberCorp Annual Report 2025
+CreateDate                      : 2026:02:10 11:03:00
+$ exiftool -s -Artist -Make -Model -Software -DateTimeOriginal -GPSPosition team-photo.jpg
+Artist                          : Leo Fortin
+Make                            : Apple
+Model                           : iPhone 13
+Software                        : iOS 17.6
+DateTimeOriginal                : 2026:09:18 14:22:05
+GPSPosition                     : 49 deg 53' 16.80" N, 119 deg 29' 45.60" W
+$ exiftool -s -Creator -LastModifiedBy -Title -Description -RevisionNumber -CreateDate vpn-setup-guide.docx
+Creator                         : priya.raman
+LastModifiedBy                  : CORP\lfortin
+Title                           : VPN Setup Guide v3
+Description                     : Draft - internal path \\fs01.corp.cybercorp.example\IT\Guides
+RevisionNumber                  : 7
+CreateDate                      : 2026:05:04 09:12:00Z
+</pre>
+<p>Countermeasure: strip metadata (exiftool -all= or export scrubbed PDFs) before publishing; ban GPS on press photos.</p>
+</details></section>
+
+<section id="p4"><h2>Part 4 — People &amp; technology from public pages (25 min)</h2>
+<div class="goal">Fill people and system baskets from the simulated leadership page and job post.</div>
+<ul class="tasks">
+<li>Read <code>cybercorp-site/leadership.html</code> and <code>job-posting.txt</code>.</li>
+<li>Build a people table (name, role, email/pattern, source).</li>
+<li>Build a technology table (product, version if any, basket=system, source).</li>
+</ul>
+<details class="sol"><summary>Show solution</summary>
+<pre>SIMULATED job posting (fictional) - CyberCorp Enterprise - IT Systems Administrator (Kelowna, hybrid)
+Posted 2026-10-02 on the CyberCorp careers page and a public job board.
+
+You will:
+ - Administer our Windows Server 2019 Active Directory domain (CORP) and Microsoft 365 tenant
+ - Maintain Fortinet FortiGate firewalls and our FortiClient VPN for 140 remote staff
+ - Support our migration from on-premises Exchange 2016 to Exchange Online (target: Q1 2027)
+ - Patch our customer portal (Apache Tomcat 9 + PostgreSQL 13) on a monthly cycle
+Nice to have: experience with Veeam backups, Cisco Meraki Wi-Fi, and ServiceNow.
+Apply to careers@cybercorp.example
+</pre>
+<p>People: Dana Whitfield CEO; Marcus Oyelaran CIO; Priya Raman IT Systems Manager (priya.raman@…); Leo Fortin Help Desk Lead (leo.fortin@ inferred).</p>
+<p>Tech: Windows Server 2019 AD; Microsoft 365; FortiGate + FortiClient; Exchange 2016→Online; Tomcat 9; PostgreSQL 13; Veeam; Meraki; ServiceNow.</p>
+</details></section>
+
+<section id="p5"><h2>Part 5 — Dorks on paper (20 min)</h2>
+<div class="goal">Write safe Google queries you would run if CyberCorp.example were a real authorized target — but do not run them against the live internet unless the instructor opens an approved exercise.</div>
+<ul class="tasks">
+<li>Write five queries using site:, filetype:, intitle:, inurl:, and after: scoped to cybercorp.example.</li>
+<li>Mark which GHDB category each resembles (files, directories, vulnerable servers, etc.).</li>
+<li>Strike any query that lacks site: scoping.</li>
+</ul>
+<details class="sol"><summary>Show solution</summary>
+<pre>site:cybercorp.example filetype:pdf FortiClient
+site:cybercorp.example intitle:"index of" backup
+site:cybercorp.example inurl:admin
+site:cybercorp.example after:2026-01-01 careers
+site:cybercorp.example filetype:docx confidential OR internal
+# Rejected: intitle:"index of" backup   (no site: — too broad)</pre>
+</details></section>
+
+<section id="p6"><h2>Part 6 — Assemble dossier &amp; countermeasures (30 min)</h2>
+<div class="goal">Produce the Phase 1 deliverable.</div>
+<ul class="tasks">
+<li>Write a ½-page executive summary for CyberCorp’s CIO.</li>
+<li>Include tables: domain/DNS, subdomains, people/emails, technologies, web paths, metadata findings.</li>
+<li>Add 5 concrete countermeasures (metadata scrubbing, job-ad review, CT monitoring, robots≠ACL, staging DNS hygiene).</li>
+<li>Appendix: commands run + dates.</li>
+</ul>
+<details class="sol"><summary>Show solution (outline)</summary>
+<p><b>Exec summary:</b> Passive review of CyberCorp’s public trail shows VPN and portal technologies, staging exposure, internal UNC paths in a published guide, and a predictable email pattern. No active scans were performed. Priority fixes: scrub metadata, restrict staging certificates/DNS, rewrite job posts, treat robots Disallow paths as disclosure.</p>
+<p><b>Countermeasures:</b> (1) exiftool scrub on all press/docs; (2) HR job-ad tech review; (3) monitor crt.sh / CT; (4) authenticate /admin and /backup; (5) remove staging from public DNS when idle.</p>
+</details></section>
+
+<section id="res"><h2>Resources</h2>
+<ul>
+<li>Lecture decks: week2-instructor.html / week2-student.html</li>
+<li>ICANN Lookup · RFC 9309 · crt.sh · Wayback · ExifTool · theHarvester · GHDB · scanme.nmap.org</li>
+<li>Quiz 1 due Fri Oct 16, 2026 11:59 pm PT (no generative AI)</li>
+</ul>
+</section>
+</main></div>
+<script>/* lab toggles only */</script>
+</body></html>
