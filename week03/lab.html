@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Week 3 Lab — CyberCorp Active Scanning &amp; Enumeration · ETH-201</title>
+<style>
+:root{--navy:#14294a;--teal:#087e79;--bg:#eef2f7;--ink:#202e42;--muted:#59687d;--line:#dbe3ec}
+*{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+header{-webkit-print-color-adjust:exact;print-color-adjust:exact;background:linear-gradient(135deg,#0d1d36,#14294a 60%,#0d3d3a);color:#fff;padding:44px 24px 36px}
+header .in{max-width:1180px;margin:0 auto} header .top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
+header .logo{height:64px;width:auto} header .wk{background:#087e79;border-radius:999px;padding:5px 14px;font-weight:800;font-size:13px;letter-spacing:.06em;text-transform:uppercase}
+header .eb{color:#7ed2c2;font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:13px}
+header h1{margin:10px 0 6px;font-size:32px;line-height:1.15} header p{margin:0;color:#c9d7ec;max-width:920px}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px} .meta span{background:#ffffff18;border:1px solid #ffffff30;border-radius:999px;padding:6px 12px;font-size:13px}
+.wrap{max-width:1180px;margin:24px auto;padding:0 24px 80px;display:grid;grid-template-columns:250px 1fr;gap:22px}
+nav{position:sticky;top:16px;align-self:start;background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
+nav b{display:block;margin-bottom:8px;color:var(--navy)} nav a{display:block;padding:6px 0;color:var(--navy);text-decoration:none;font-size:14px;font-weight:600} nav a:hover{color:var(--teal)}
+main section{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px 26px;margin-bottom:18px}
+h2{margin:0 0 10px;color:var(--navy);font-size:22px} h3{color:var(--navy);margin:18px 0 8px}
+.goal{background:#e9f6f2;border-left:4px solid var(--teal);padding:12px 14px;border-radius:0 8px 8px 0}
+.ethics{background:#fff4e8;border-left:4px solid #b45a28;padding:12px 14px;border-radius:0 8px 8px 0;margin:12px 0}
+.checkpoint{background:#eef6ff;border-left:4px solid #4964b5;padding:12px 14px;border-radius:0 8px 8px 0}
+pre,code{font-family:ui-monospace,Menlo,Consolas,monospace} pre{background:#13263e;color:#e5eff8;padding:14px;border-radius:8px;overflow:auto;white-space:pre-wrap;font-size:12.5px}
+details.sol{margin-top:12px;border:1px solid var(--line);border-radius:8px;padding:10px 14px;background:#f7fafc}
+details.sol summary{cursor:pointer;font-weight:700;color:var(--navy)}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0} button{font:inherit;border:1px solid #bac8d9;background:#fff;color:var(--navy);padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:650}
+ul.tasks{padding-left:20px} ul.tasks li{margin:6px 0}
+.callout{background:#f4f7fb;border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:10px 0}
+@media(max-width:860px){.wrap{grid-template-columns:1fr} nav{position:static} header h1{font-size:26px}}
+</style></head><body>
+<header><div class="in">
+<div class="top"><img class="logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAlgAAAD4CAMAAAAHO2gpAAABIFBMVEUAAADYAA/+/v7+/v7kABH+AAC3AADXAA/YAA79+PnUAAzYAA/XAA/XAA/+/f3++/zXAA/++fn+/Px/AAD++Pn85uj76OvnZW752NjdKDX41tj2yMz75+n3yMrqeoLxpaviSFL7vLzbGCT76+3ulpz/f3/shY33qazgOUXvnKLlWWPztrv2mJjkUlvpc3vaERzeMjz1u9D/2ezamZn/AP/1vMGqVVW/f3/87u/0lrL3qs363uB/f3+qqqq4///aACTiABD/yOv32du/v7/Uf3/fv7/gMT7/f///qv/43uP//78A//9/AH9///+ZAAC2ACS/P3/UVVXMZmbUqtTU1NTgABHhAA//AFX/Var/f7/77/EAAAAAAAAAAAAAAAAAAADmO3O0AAAAYHRSTlMA/v0D/gIDrSpvENBsUdCQkFCuAjEVLf8P/////wz///8H/0n/Av8G/////wj/////DBAHAf8DBGsJB/8CAwMH1gciBAYI/wIDKwQBAgIFBwQGBQYGOnADAwSDAAAAAACmJAVsAAArjElEQVR42u2dB3/bOpboKYGgWERSVHFkO45LruP05LaZO213Znbftre9vLLf/4MsAIIkQKJRBEk5P2DvThJTomjj73MOTvW8b3PBOPag55ZbtlecQm/nfgzzreCsljUhA714HTuy3LK+dl64cdpwxpWe17JHQuClK6cN51v+Wa1FaA+FwFuvYujImmktzmtZBAvpwU3i7Zw2dGBZBgvJrNXKg44sB5ZlsCCMFysvcGQ5sOyChZRhuNggweXWHMb7NwwWPhr6a0fWHGuzWpwTW5bBQkxtHFkzrTjdJAv/GwULBjDxU0fW9IuYtjDcJOcht2yDhc0s3w8dWTMsSA7kcbryv0WwEFlrP3HBnbnYwr/RqYlCPMWdPitYCKmVv4qd02FGuRUneghWfVeSUBznAmsH44XvnA5zsuXFOnXor05yU4bpGh8Q/FnAQt8XksXuaDinIe/FOkW4gjHst+q7h+uVXteOARZRhujOThnOSFbq6yQW7C+x0AqIvAi1aI0C1m6HlGESu6jhnJYWY2a9vfta/fXh1au3p4LV2DqImVBjxo0CFvmF8V08elaRta42/tPVcrm8flH+43K5fDMULMKtF2/86cEi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" alt="Focus College logo"><span class="wk">Week 3 Lab</span></div>
+<div class="eb">Ethical Hacking (ETH-201) · Focus College · Fall 2026 · Instructor: Arpan Bhavsar</div>
+<h1>Week 3 Lab — Active Scanning &amp; Service Enumeration (Project Phase 2a)</h1>
+<p>Follow along with the lecture: each lab part is labeled <b>Do together after Section N</b> and matches a Hands-on together slide. In class we type Parts 1–5 live on <b>Metasploitable 2</b> (primary) or the Kali-only CyberCorp fallback; Part 6 (five findings) is the short end-of-class wrap-up that seeds Assignment 1.</p>
+<div class="meta"><span>Primary: Metasploitable 2 (VMware isolated)</span><span>Fallback: cybercorp_range.py on 127.0.0.1</span><span>Feeds Assignment 1 (6%)</span><span>Quiz 1 due today before midnight PT</span></div>
+</div></header>
+<div class="wrap">
+<nav><b>Lab parts</b>
+<a href="#start">Before you start</a>
+<a href="#p1">Part 1 — after Sec 1 (setup)</a>
+<a href="#p2">Part 2 — after Sec 1 (TCP)</a>
+<a href="#p3">Part 3 — after Sec 2–3</a>
+<a href="#p4">Part 4 — after Sec 3 (NSE)</a>
+<a href="#p5">Part 5 — after Sec 4 (enum)</a>
+<a href="#p6">Part 6 — end-of-class wrap-up</a>
+<a href="#res">Resources &amp; Assignment 1</a>
+<div class="btnrow"><button type="button" onclick="document.querySelectorAll('details.sol').forEach(d=>d.open=true)">Show all solutions</button>
+<button type="button" onclick="document.querySelectorAll('details.sol').forEach(d=>d.open=false)">Hide all solutions</button></div>
+</nav>
+<main>
+
+<section id="start"><h2>Before you start</h2>
+<div class="callout"><b>Follow-along flow.</b> Do not leave the whole lab for after class. After each teaching section the instructor opens a Hands-on together slide; you type the same commands here. Labels below map parts to sections. If you miss a block, finish it at home with Show solution — do not invent new targets.</div>
+<div class="goal"><b>Goal.</b> Produce reproducible scan and enumeration evidence for CyberCorp Phase 2a that seeds Assignment 1 (due Friday, October 23, 2026 before midnight PT).</div>
+<div class="ethics"><b>Ethics.</b> Authorized targets only: (1) Metasploitable 2 on your isolated lab network; (2) the Kali fallback on <code>127.0.0.1</code> started from this zip; (3) light use of <code>scanme.nmap.org</code>. Do <b>not</b> scan the college network, classmates, workplaces, or real organizations that resemble “CyberCorp”. Generative AI is prohibited on Quiz 1 (due today before midnight PT).</div>
+<div class="checkpoint"><b>Where to get the zip.</b> Download <code>week3-lab-assets-student.zip</code> from the course site (same place as this workbook). <b>Where to unzip.</b> Unzip it <em>next to</em> <code>week3-lab.html</code> so paths resolve like <code>lab-assets/cybercorp_range.py</code>.</div>
+<pre>mkdir -p ~/cybercorp-phase2a && cd ~/cybercorp-phase2a
+# copy week3-lab.html here, then:
+unzip week3-lab-assets-student.zip
+ls lab-assets/cybercorp_range.py lab-assets/range-extras/range_extras.sh
+mkdir -p scans</pre>
+<div class="callout"><b>Choose a path.</b> Prefer Metasploitable 2 if your VM is ready (live demos match class). Otherwise start the fallback:
+<pre>python3 lab-assets/cybercorp_range.py          # leave running
+# optional extras (DNS/SNMP/LDAP; add --smb if Samba installed):
+lab-assets/range-extras/range_extras.sh start --smb</pre>
+Record which path you used in every finding.
+</div>
+</section>
+
+<section id="p1"><h2>Part 1 — Dossier gate <span style="font-weight:600;color:#4964b5">(Do together after Section 1 · methodology)</span></h2>
+<div class="goal">Confirm authorization and pull Week 2 clues before packets. <b>Also run host discovery (-sn) on this Hands-on</b> — the discovery command is listed in Part 2 and on the Section 1 Hands-on slide.</div>
+<ul class="tasks">
+<li>Open <code>lab-assets/passive/cybercorp-week2-dossier-extract.md</code> and list three host/service clues you expect to verify actively.</li>
+<li>Write one sentence stating your authorized target (MS2 IP <em>or</em> 127.0.0.1 fallback).</li>
+<li>Run <code>nmap --version</code> and record the version string for Assignment 1.</li>
+</ul>
+<details class="sol"><summary>Show solution</summary>
+<p><b>Solution.</b> Example clues: mail01 / SMTP, fs01 / SMB, portal / Tomcat, SNMP on a management device, internal DNS names under corp.cybercorp.example. Authorization sentence: “I will scan only 127.0.0.1 services started from cybercorp_range.py and range_extras.sh for this session.”</p>
+<p><b>Why it works.</b> Week 3 must not invent targets. The dossier extract keeps continuity with Week 2 without redoing GHDB.</p>
+</details>
+</section>
+
+<section id="p2"><h2>Part 2 — Host discovery, TCP scan &amp; versions <span style="font-weight:600;color:#4964b5">(Do together after Section 1 · TCP / Nmap model)</span></h2>
+<div class="goal">Map live ports and versions; save <code>-oA</code> evidence.</div>
+<ul class="tasks">
+<li><b>Metasploitable 2 path:</b> <code>sudo nmap -sn &lt;MS2_IP&gt;</code> then <code>sudo nmap -sS -sV -O -oA scans/ms2-phase2a &lt;MS2_IP&gt;</code> (use <code>-sT</code> if you lack sudo).</li>
+<li><b>Fallback path:</b> with the range running, <code>nmap -sT -sV -p 9021,9022,9025,9080,9099 -oA scans/ccx-phase2a 127.0.0.1</code>.</li>
+<li>Paste the PORT table into your notes. Flag any outdated banners (e.g. vsftpd 2.3.4).</li>
+</ul>
+<details class="sol"><summary>Show solution — expected fallback output</summary>
+<p><b>Expected output (verified on the build box):</b></p>
+<pre># Nmap 7.95 scan initiated Sun Oct 18 07:20:09 2026 as: nmap -sT -sV -p 9021,9022,9025,9080,9099 -oA ccx-range-sT-sV 127.0.0.1
+Nmap scan report for localhost (127.0.0.1)
+Host is up (0.000048s latency).
+
+PORT     STATE  SERVICE VERSION
+9021/tcp open   ftp     vsftpd 2.3.4
+9022/tcp open   ssh     OpenSSH 7.4 (protocol 2.0)
+9025/tcp open   smtp    Postfix smtpd
+9080/tcp open   http    Apache Tomcat/Coyote JSP engine 1.1
+9099/tcp closed unknown
+Service Info: Host:  mail01.cybercorp.example; OS: Unix
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Sun Oct 18 07:20:15 2026 -- 1 IP address (1 host up) scanned in 6.14 seconds</pre>
+<p><b>Why it works.</b> Connect scan needs no root; <code>-sV</code> turns open ports into Assignment 1 findings. Closed 9099 proves reachability for later odd-flag contrasts. On Metasploitable 2 expect a much wider port set (see <code>lab-assets/sample-output/ms2-typical-sV.xml</code>).</p>
+</details>
+</section>
+
+<section id="p3"><h2>Part 3 — NULL/FIN/Xmas &amp; hping3 <span style="font-weight:600;color:#b45a28">(Do together after Sections 2–3 · Nmap types &amp; hping3)</span></h2>
+<div class="goal">See RFC 793 odd-flag behaviour and craft single packets with hping3.</div>
+<ul class="tasks">
+<li>Run <code>sudo nmap -sN -p 9021,9022,9025,9080,9099 -oN scans/ccx-null.nmap 127.0.0.1</code> (or the same ports on MS2). Repeat with <code>-sF</code> or <code>-sX</code> once.</li>
+<li>Compare open|filtered versus closed. Write one limitation sentence for Assignment 1.</li>
+<li>Run: <code>sudo hping3 -S -p 9080 -c 2 127.0.0.1</code> and <code>sudo hping3 -S -p 9099 -c 2 127.0.0.1</code>. Note SA versus RA.</li>
+<li>Optional: <code>sudo hping3 -F -P -U -p 9099 -c 1 127.0.0.1</code> (Xmas-style to a closed port).</li>
+</ul>
+<details class="sol"><summary>Show solution</summary>
+<pre># Nmap 7.95 scan initiated Sun Oct 18 07:19:32 2026 as: nmap -sN -p 9021,9022,9025,9080,9099 -oN ccx-range-sN.nmap 127.0.0.1
+Nmap scan report for localhost (127.0.0.1)
+Host is up (0.0000070s latency).
+
+PORT     STATE         SERVICE
+9021/tcp open|filtered panagolin-ident
+9022/tcp open|filtered paragent
+9025/tcp open|filtered swa-3
+9080/tcp open|filtered glrpc
+9099/tcp closed        unknown
+
+# Nmap done at Sun Oct 18 07:19:33 2026 -- 1 IP address (1 host up) scanned in 1.30 seconds</pre>
+<pre>$ sudo hping3 -S -p 9080 -c 2 127.0.0.1        # SYN to an open port
+HPING 127.0.0.1 (lo 127.0.0.1): S set, 40 headers + 0 data bytes
+len=44 ip=127.0.0.1 ttl=127 DF id=0 sport=9080 flags=SA seq=0 win=65495 rtt=3.8 ms
+len=44 ip=127.0.0.1 ttl=127 DF id=0 sport=9080 flags=SA seq=1 win=65495 rtt=3.8 ms
+
+--- 127.0.0.1 hping statistic ---
+2 packets transmitted, 2 packets received, 0% packet loss
+round-trip min/avg/max = 3.8/3.8/3.8 ms
+
+$ sudo hping3 -S -p 9099 -c 2 127.0.0.1        # SYN to a closed port
+HPING 127.0.0.1 (lo 127.0.0.1): S set, 40 headers + 0 data bytes
+len=40 ip=127.0.0.1 ttl=127 DF id=0 sport=9099 flags=RA seq=0 win=0 rtt=11.8 ms
+len=40 ip=127.0.0.1 ttl=127 DF id=0 sport=9099 flags=RA seq=1 win=0 rtt=3.8 ms
+
+--- 127.0.0.1 hping statistic ---
+2 packets transmitted, 2 packets received, 0% packet loss
+round-trip min/avg/max = 3.8/7.8/11.8 ms
+
+$ sudo hping3 -F -P -U -p 9099 -c 1 127.0.0.1  # FIN+PSH+URG (Xmas) to a closed port
+HPING 127.0.0.1 (lo 127.0.0.1): FPU set, 40 headers + 0 data bytes
+len=40 ip=127.0.0.1 ttl=127 DF id=0 sport=9099 flags=RA seq=0 win=0 rtt=12.0 ms
+
+--- 127.0.0.1 hping statistic ---
+1 packets transmitted, 1 packets received, 0% packet loss
+…</pre>
+<p><b>Why it works.</b> Classic stacks RST closed ports on odd flags and stay silent on open ports; many modern stacks blur this into open|filtered — document uncertainty instead of inventing certainty.</p>
+</details>
+</section>
+
+<section id="p4"><h2>Part 4 — Safe NSE <span style="font-weight:600;color:#4964b5">(Do together after Section 3 · NSE)</span></h2>
+<div class="goal">Run named safe/default scripts against ports you already know are open.</div>
+<ul class="tasks">
+<li>Fallback: <code>nmap -sT -sV -p 9025,9080 --script smtp-commands,http-title,http-robots.txt -oN scans/ccx-nse.nmap 127.0.0.1</code></li>
+<li>MS2: pick two open ports from Part 2 and run appropriate safe scripts (e.g. <code>smb-os-discovery</code>, <code>http-title</code>).</li>
+<li>Record script names and key lines (VRFY advertised? robots Disallow paths?).</li>
+</ul>
+<details class="sol"><summary>Show solution</summary>
+<p>Verified fallback NSE showed Postfix advertising VRFY, HTTP title “CyberCorp Kelowna Intranet”, and robots Disallow for <code>/portal/admin/</code> and <code>/backup-2025/</code>. See <code>lab-assets/sample-output/ccx-range-nse.nmap</code>.</p>
+<p><b>Why it works.</b> Named scripts beat blanket <code>--script vuln</code> on day one of Phase 2a.</p>
+</details>
+</section>
+
+<section id="p5"><h2>Part 5 — Service enumeration <span style="font-weight:600;color:#7954a0">(Do together after Section 4 · enumeration)</span></h2>
+<div class="goal">Extract users, MIB data, zone records and shares — CEH enumeration phase.</div>
+<ul class="tasks">
+<li><b>SMTP:</b> Use the manual dialogue pattern from lecture <em>or</em> <code>nmap --script smtp-enum-users</code> with <code>lab-assets/wordlists/ccx-usernames.txt</code> against fallback port 9025 (or MS2 port 25).</li>
+<li><b>SNMP (fallback extras):</b> <code>snmpwalk -v2c -c public 127.0.0.1:1161 1.3.6.1.2.1.1</code></li>
+<li><b>DNS AXFR (fallback extras):</b> <code>dig @127.0.0.1 -p 5353 cybercorp.example AXFR</code> then the same for <code>corp.cybercorp.example</code>. Contrast refuse vs leak.</li>
+<li><b>SMB:</b> <code>enum4linux-ng -A &lt;target&gt;</code> and/or <code>smbclient -L //&lt;target&gt; -N</code> (MS2 or fallback with <code>--smb</code>).</li>
+<li><b>LDAP (optional extras):</b> <code>ldapsearch -x -H ldap://127.0.0.1:3890 -b ou=People,dc=corp,dc=cybercorp,dc=example uid cn title description</code></li>
+</ul>
+<details class="sol"><summary>Show solution — verified fallback snippets</summary>
+<p><b>SMTP manual:</b></p><pre>220 mail01.cybercorp.example ESMTP Postfix (CyberCorp relay)
+>>> EHLO kali.lab
+250-mail01.cybercorp.example
+250-PIPELINING
+250-SIZE 20480000
+250-VRFY
+250-ETRN
+250-8BITMIME
+250 DSN
+>>> VRFY dwhitfield
+250 2.0.0 Dana Whitfield <dwhitfield@cybercorp.example>
+>>> VRFY jsmith
+550 5.1.1 <jsmith>: Recipient address rejected: User unknown in local recipient table
+>>> EXPN it-ops
+250-2.1.5 Leo Fortin <lfortin@cybercorp.example>
+250 2.1.5 Priya Raman <praman@cybercorp.example>
+>>> MAIL FROM:<test@kali.lab>
+250 2.1.0 Ok
+>>> RCPT TO:<praman@cybercorp.example>
+250 2.1.5 Ok
+>>> RCPT TO:<ceo@cybercorp.example>
+550 5.1.1 <ceo@cybercorp.example>: Recipient address rejected: User unknown
+>>> QUIT
+221 2.0.0 Bye</pre>
+<p><b>SNMP:</b></p><pre>$ snmpwalk -v2c -c public 127.0.0.1:1161 1.3.6.1.2.1.1      # MIB-2 system group
+iso.3.6.1.2.1.1.1.0 = STRING: "CyberCorp lab switch emulator (training)"
+iso.3.6.1.2.1.1.2.0 = OID: iso.3.6.1.4.1.8072.3.2.10
+iso.3.6.1.2.1.1.3.0 = Timeticks: (5141) 0:00:51.41
+iso.3.6.1.2.1.1.4.0 = STRING: "Leo Fortin <it-ops@cybercorp.example>"
+iso.3.6.1.2.1.1.5.0 = STRING: "ccx-core-sw01"
+iso.3.6.1.2.1.1.6.0 = STRING: "CyberCorp Kelowna HQ - Server Room B"
+iso.3.6.1.2.1.1.8.0 = Timeticks: (0) 0:00:00.00
+
+$ snmpwalk -v2c -c wrongpass -t 1 -r 0 127.0.0.1:1161 1.3.6.1.2.1.1   # wrong community string
+Timeout: No Response from 127.0.0.1:1161</pre>
+<p><b>DNS AXFR contrast:</b></p><pre>$ dig @127.0.0.1 -p 5353 cybercorp.example AXFR        # hardened public zone
+
+; <<>> DiG 9.20.29-1~deb13u1-Debian <<>> @127.0.0.1 -p 5353 cybercorp.example AXFR
+; (1 server found)
+;; global options: +cmd
+; Transfer failed.
+
+$ dig @127.0.0.1 -p 5353 corp.cybercorp.example AXFR   # misconfigured internal zone
+
+; <<>> DiG 9.20.29-1~deb13u1-Debian <<>> @127.0.0.1 -p 5353 corp.cybercorp.example AXFR
+; (1 server found)
+;; global options: +cmd
+corp.cybercorp.example.	3600	IN	SOA	ns1.cybercorp.example. hostmaster.cybercorp.example. 2026101801 3600 900 604800 300
+corp.cybercorp.example.	3600	IN	NS	ns1.cybercorp.example.
+_ldap._tcp.corp.cybercorp.example. 3600	IN SRV	0 100 389 dc01.corp.cybercorp.example.
+backup01.corp.cybercorp.example. 3600 IN A	10.20.30.50
+dc01.corp.cybercorp.example. 3600 IN	A	10.20.30.10
+fs01.corp.cybercorp.example. 3600 IN	A	10.20.30.15
+legacy01.corp.cybercorp.example. 3600 IN A	10.20.30.25
+legacy01.corp.cybercorp.example. 3600 IN TXT	"Ubuntu 8.04 - do not patch, vendor app (ask Leo)"
+printhq.corp.cybercorp.example.	3600 IN	A	10.20.30.80
+corp.cybercorp.example.	3600	IN	SOA	ns1.cybercorp.example. hostmaster.cybercorp.example. 2026101801 3600 900 604800 300
+;; Query time: 4 msec
+;; SERVER: 127.0.0.1#5353(127.0.0.1) (TCP)
+;; WHEN: Sun Oct 18 07:23:43 MST 2026
+;; XFR size: 10 records (messages 1, bytes 410)</pre>
+<p><b>SMB:</b></p><pre>$ smbclient -L //127.0.0.1 -N
+
+	Sharename       Type      Comment
+	---------       ----      -------
+	public          Disk      CyberCorp public share
+	finance-archive Disk      Finance archive (restricted)
+	IPC$            IPC       IPC Service (CyberCorp FS01 (training))
+SMB1 disabled -- no workgroup available
+
+$ smbclient //127.0.0.1/public -N -c "ls"
+  .                                   D        0  Sun Oct 18 07:26:00 2026
+  ..                                  D        0  Sun Oct 18 07:26:00 2026
+  README-FS01.txt                     N      136  Sun Oct 18 07:26:00 2026
+
+		131063268 blocks of size 1024. 124576616 blocks available
+
+$ smbclient //127.0.0.1/finance-archive -N -c "ls"
+tree connect failed: NT_STATUS_ACCESS_DENIED</pre>
+<p><b>enum4linux-ng (share excerpt):</b></p><pre>ENUM4LINUX - next generation (v1.3.10)
+
+ ==========================
+|    Target Information    |
+ ==========================
+[*] Target ........... 127.0.0.1
+[*] Username ......... ''
+[*] Random Username .. 'yybktsbp'
+[*] Password ......... ''
+[*] Timeout .......... 10 second(s)
+
+ ==================================
+|    Listener Scan on 127.0.0.1    |
+ ==================================
+[*] Checking LDAP
+[-] Could not connect to LDAP on 389/tcp: connection refused
+[*] Checking LDAPS
+[-] Could not connect to LDAPS on 636/tcp: connection refused
+[*] Checking SMB
+[+] SMB is accessible on 445/tcp
+[*] Checking SMB over NetBIOS
+[+] SMB over NetBIOS is accessible on 139/tcp
+
+ ========================================================
+|    NetBIOS Names and Workgroup/Domain for 127.0.0.1    |
+ ========================================================
+[-] Could not get NetBIOS names information via 'nmblookup': timed out
+
+ ======================================
+|    SMB Dialect Check on 127.0.0.1    |
+ ======================================
+[*] Trying on 445/tcp
+[+] Supported dialects and settings:
+Supported dialects:
+  SMB 1.0: false
+…</pre>
+<p><b>Why it works.</b> Enumeration depth is twenty percent of Assignment 1. Two or more protocols beyond banners separates a port dump from a CEH-quality report.</p>
+</details>
+</section>
+
+<section id="p6"><h2>Part 6 — Five report-ready findings <span style="font-weight:600;color:#267454">(End-of-class wrap-up · after Section 5)</span></h2>
+<div class="goal">Normalize evidence into the Assignment 1 attack-surface shape.</div>
+<ul class="tasks">
+<li>Copy <code>lab-assets/templates/findings-template.md</code> into your working folder.</li>
+<li>Write five findings with host/port, evidence, CEH detail, and High/Medium/Low priority in CyberCorp business language.</li>
+<li>Attach your <code>-oA</code> files and enum logs. Complete <code>lab-assets/templates/assignment1-checklist.md</code>.</li>
+</ul>
+<details class="sol"><summary>Show solution</summary>
+<p>Instructor model answers live in the instructor lab-assets zip under the solutions folder (not shipped to students). Model priorities: outdated vsftpd, SNMP public, AXFR legacy01 TXT, SMTP VRFY users, guest SMB share — with closed 9099 as supporting Low evidence only.</p>
+</details>
+</section>
+
+<section id="res"><h2>Resources &amp; Assignment 1</h2>
+<ul>
+<li>Nmap Reference Guide — <a href="https://nmap.org/book/man.html">https://nmap.org/book/man.html</a></li>
+<li>NSE docs — <a href="https://nmap.org/nsedoc/">https://nmap.org/nsedoc/</a></li>
+<li>enum4linux-ng — <a href="https://github.com/cddmp/enum4linux-ng">https://github.com/cddmp/enum4linux-ng</a></li>
+<li>Metasploitable 2 — <a href="https://docs.rapid7.com/metasploit/metasploitable-2/">https://docs.rapid7.com/metasploit/metasploitable-2/</a></li>
+<li>scanme.nmap.org policy — light scans only</li>
+</ul>
+<div class="checkpoint"><b>Assignment 1 (6%).</b> Issued today. Due <b>Friday, October 23, 2026 before midnight PT</b>. Report (3–5 pages) + raw Nmap <code>-oA</code> + enum logs. Rubric: OSINT 25 · Nmap 25 · Enumeration 20 · Attack-surface synthesis 20 · Professionalism 10.</div>
+<div class="ethics"><b>Quiz 1 (5%).</b> Due <b>today before midnight PT</b> on the LMS. Weeks 1–2 only. No generative AI.</div>
+</section>
+
+</main></div>
+</body></html>
